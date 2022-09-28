@@ -1,0 +1,90 @@
+=============== one to may ===================
+ref link : https://levelup.gitconnected.com/7-steps-to-create-an-api-in-rails-2f984c7c4286
+
+
+1. Create new app rails new [name] --api 
+
+   - name : of project 
+   - --api : flag to create a new app with additional api specific configuration. will skip code generation for .erb files with 
+   ActionView
+   - u can add --minimal flag skips rails features we wont use such as email sending and image processing features.
+
+   - project : BookShop 
+   - Association : starter one to many 
+   - rails new Bookshop --api 
+
+2. Uncomment gem for cors : What is cross origin resource sharing ?  
+3.To get our api's running :  Create our resources i.e. controller and route actions for our rails server : a model to interact with the database  
+: additionally a migration to generate the corresponding database table for our model.
+   - in our example we will create two resources : Book : Members .
+   - run rails generate [name] [attribute] [attribute]
+     - name : should be populated with desired db name 
+     - attribute : populate dwith the db table columns that the resource needs 
+     - the default data type for all attributes is string : tweak it by making this change to the command e.g.
+
+     rails generate resource Members name gender phoneNumber:integer
+     rails generate resource Books name Rentedto
+
+4. Next we populate our seeds 
+   - navigate to the db folder open seeds.rb : reference comments for what code does 
+5. Add a forieng_key reference to establish our one to many relationship between books and members i.e. one member can have many books 
+go to migration for books : add this 
+t.references :member, null: false, forieng_key: true
+
+   - run rails db:migrate
+   - if u need to rollback run rails db:rollback
+
+6. Set up your Associations 
+   - in our app, one Member has many books and many books can belong to one Member 
+   - inside the Book model : add belongs_to :member
+
+   Note: this step applies when you have multiple resources that relate to one another. 
+   In our case, we have a one-to-many relationship. 
+   You could have multiple resources in a many-to-many relationship,
+    or even just a single resource (thus no relationship and no associations needed).
+
+7. Write out the routes 
+   demo : check member controller 
+
+8. run seed : rails db:seed
+9. Enable cors : only necessary if you want to connect API's to frontend. 
+
+First, open up your gemfile and uncomment gem 'rack-cors' (line 29).
+
+Second, navigate to “config” -> “initializers” -> cors.rb. 
+In here, uncomment lines 8–16. Change line 10 from from origins 'example.com' to origins '*'.
+
+
+10. run rails server
+
+
+-------------------- many to many relationship -----------------------------
+NB: to run this make modifications if on the same project as follows 
+- remove foreing key in books migration. -> functionality will be served by join table 
+
+
+1. The first step in creating a many-to-many relationship in Rails is to create both parent tables.
+2. We have Books and Members : Books can be rented to many members (not same book copies of the same book) and members can rent 
+multiple books
+
+The join table is simply books_members 
+The table will not have unique attributes as it just needs to show the relationship
+
+3. To do this 
+rails generate resource book-member book:references member:references 
+This is telling the database that this model belongs to the two parent models 
+and creates a foreign key column for book_id and member_id.
+ In some cases, you may want to give attributes to the join table, but it is not necessary. 
+ For example, if you had a many-to-many relationship between customers and banks with the join being an account,
+  you could give the join table attributes like account number or date opened.
+
+
+4. Now it’s time to establish the relationships in the models. 
+By giving the join table t.referensces, it automatically defined the relationship in book_member. 
+
+  add code in Model classes Book and Member to establish the relationship
+
+  5. to return specific data in JSON use concepts of serializers : https://stackoverflow.com/questions/44503407/rails-how-to-specify-which-fields-to-output-in-a-controllers-json-response
+
+
+In reference to seed data we have all we need now is to intro the relationship models where needed in our routes file.
